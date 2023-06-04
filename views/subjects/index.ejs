@@ -1,0 +1,7 @@
+<h2>Modules</h2>
+<% if(subjects.length > 0){ %>
+    <% subjects.forEach(subject =>{ %>
+        <div><a href="/subjects/<%=subject.module_code%>"> <%=subject.name%> </a></div>
+    <%})}else{%>
+        <div>No Modules</div>
+    <%}%>

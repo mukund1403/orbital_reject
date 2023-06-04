@@ -1,0 +1,25 @@
+<h2>Assignments for <%=module_code%></h2>
+<% if (assignments.length > 0){ %>
+    <div>
+        <h3>Upcoming Assignments</h3>
+        <% assignments.forEach(assignment => { %>
+            <% if (assignment.days_left >= 0) { %>
+                <div> <%=assignment.assignment_name%> <%=assignment.formatted_date%> <%=assignment.days_left_tag%> </div>
+            <% } %>
+        <%}) %>
+    </div>
+    <br/>
+    <div>
+        <h3>Past Assignments</h3>
+        <% assignments.forEach(assignment => { %>
+            <% if (assignment.days_left < 0) { %>
+                <div> <%=assignment.assignment_name%> <%=assignment.formatted_date%> <%=assignment.days_left_tag%> </div>
+            <% } %>
+        <%}) %>
+    </div>
+    
+    <%}else { %>
+    <div>No assignments</div>
+<%}%>
+<br/>
+<%- include('./back_button.ejs',{module_code:module_code})%>
