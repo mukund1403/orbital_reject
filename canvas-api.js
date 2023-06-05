@@ -1,9 +1,9 @@
 const express = require('express')
 const router = express()
 const database = require('./databases')
-const access_token = "21450~i6hDITA6OTPHJf9aDxRdrMGRgeFhCn4QgUKnubWEnNXP3prGaGD0Nmkkjm0J9tz1"
 require('dotenv').config()
-console.log(process.env.MYSQL_HOST)
+const access_token = process.env.CANVAS_API_TOKEN
+console.log(access_token)
 function fetchCourses(){
     const url = `https://canvas.nus.edu.sg/api/v1/courses?access_token=${access_token}`
     fetch(url)
@@ -36,7 +36,6 @@ async function fetchAssignments(){
         `SELECT id
         FROM subjects`
     )
-    console.log(subjects)
     subjects.forEach(subject=>{
         const url = `https://canvas.nus.edu.sg/api/v1/courses/${subject.id}/assignments?access_token=${access_token}`
         fetch(url)
@@ -83,8 +82,8 @@ async function fetchAssignments(){
         return date_arr[0]
     }
 }
-fetchCourses()
-//fetchAssignments()
+//fetchCourses()
+fetchAssignments()
 
 
 
