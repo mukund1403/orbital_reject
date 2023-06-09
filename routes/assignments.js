@@ -1,15 +1,32 @@
 const express = require('express')
 const router = express()
 const database = require('../databases')
+const checkAuthentication = require('./partials/checkAuthentication') 
+const passport = require('passport')
+const initializePassport = require('../passport-config')
+initializePassport(passport,
+    async(email) =>  await database.query(
+        `SELECT *
+        FROM users
+        WHERE email = ?`,[email]
+    ),
+    async(id) => await database.query(
+        `SELECT user_id
+        FROM users
+        WHERE user_id = ?`,[id]
+    )
+    )
 
 
-router.get('/',async (req,res)=>{
+router.get('/',checkAuthentication.checkAuthenticated, async (req,res)=>{
     try{
+        const [user] = await req.user
+        const user_id = user[0].user_id
         let [assignments] = await database.query(
             `SELECT *, DATE_FORMAT(due_date,'%d/%m/%Y') AS formatted_date 
             FROM assignments
-            WHERE completed = ?
-            ORDER BY due_date`,[0]
+            WHERE user_id = ? AND completed = ?
+            ORDER BY due_date`,[user_id,0]
         )
         findDaysLeft(assignments)
         res.render("assignments/allAssignments",{assignments:assignments,})
@@ -56,5 +73,7 @@ function leapyear(year)
 {
 return (year % 100 === 0) ? (year % 400 === 0) : (year % 4 === 0);
 }
+
+
 
 module.exports = router

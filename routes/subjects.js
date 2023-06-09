@@ -1,13 +1,17 @@
 const express = require('express')
 const router = express()
 const database = require('../databases')
+const checkAuthentication = require('./partials/checkAuthentication') 
 
 
-router.get('/',async (req,res)=>{
+router.get('/',checkAuthentication.checkAuthenticated, async (req,res)=>{
     try{
+        const [user] = await req.user
+        const user_id = user[0].user_id
         const [subjects] = await database.query(
             `SELECT *
-            FROM subjects`
+            FROM subjects
+            WHERE user_id = ?`,[user_id]
         )
         res.render("subjects/index",{subjects:subjects})
     } catch{
@@ -16,7 +20,7 @@ router.get('/',async (req,res)=>{
     
 })
 
-router.get('/:id',async (req,res)=>{
+router.get('/:id',checkAuthentication.checkAuthenticated, async (req,res)=>{
     try{
         const module_code = req.params.id
         res.render("subjects/show",{module_code:module_code})
@@ -26,14 +30,16 @@ router.get('/:id',async (req,res)=>{
     
 })
 
-router.get('/:id/assignments',async (req,res)=>{
+router.get('/:id/assignments',checkAuthentication.checkAuthenticated, async (req,res)=>{
     try{
+        const [user] = await req.user
+        const user_id = user[0].user_id
         const module_code = req.params.id
         let [assignments] = await database.query(
             `SELECT assignment_name, DATE_FORMAT(due_date,'%d/%m/%Y') AS formatted_date 
             FROM assignments
-            WHERE module_code = ? AND completed = ?
-            ORDER BY due_date`,[module_code,0]
+            WHERE user_id = ? AND module_code = ? AND completed = ?
+            ORDER BY due_date`,[user_id,module_code,0]
         )
         findDaysLeft(assignments)
         res.render("subjects/assignments",{
