@@ -125,12 +125,13 @@ router.get('/sample_data', async (req, res) => {
                         var examDate2 = 0;
                         var Finals = 0;
                         var SU = "Nah, sorry bro";
+                        var days = "Not applicable"
 
-                        if (response.data.attributes.hasOwnProperty("su")) {
-                            SU = "Yessir";
+                        if (response.data.attributes && response.data.attributes.hasOwnProperty("su")) {
+                            SU = "Yessir"
+                            console.log(response.data.attributes.su)
                         }
-                        console.log(response.data.attributes.su)
-
+                                         
                         
 
                         if (data[0] && data[0].hasOwnProperty("examDate") && data[0].semester == 1) {
@@ -168,8 +169,28 @@ router.get('/sample_data', async (req, res) => {
                         console.log('No data available.');
                     }
                     
-                    const updateQuery = 'UPDATE userbase.users SET examDate = ?, title = ?, SU = ? WHERE moduleCode = ?';
-                    database.query(updateQuery,[Finals, modTitle, SU, moduleCode], function(error, data) {
+                    
+                    
+                    
+                    if (Finals != "No Data Available") {
+                        const currentTime = new Date().getTime()
+                        const futureDate = Date.parse(Finals)
+                        const timeDiff = futureDate - currentTime
+                        if (timeDiff <= 0) {
+                            console.log(moduleCode,' Exam Day!')
+                        }
+                        //console.log(currentTime)
+                        //console.log(Finals)
+                        //console.log(futureDate)
+                        //console.log(timeDiff)
+                        
+                        days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                        console.log("!!!!!!!!! ", days)
+                        //const interval = setInterval(calcExamDays,100000);
+                    }
+
+                    const updateQuery = 'UPDATE userbase.users SET examDate = ?, title = ?, SU = ?, examDays = ? WHERE moduleCode = ?';
+                    database.query(updateQuery,[Finals, modTitle, SU, days, moduleCode], function(error, data) {
                     if (error) {
                         console.error('Error updating data in the database:', error);
                         return;
@@ -182,7 +203,7 @@ router.get('/sample_data', async (req, res) => {
                     console.error('Error:', error);
                 });
             }
-            res.render('/', {title:'NUSMods', action:'list', sampleData:data})
+            //res.render('/', {title:'NUSMods', action:'list', sampleData:data})
         }
     })
 })
@@ -210,6 +231,24 @@ router.get('/search', async(req, res) =>{
         res.render('nusmods/mod-search',  {sampleData:data})
     })
 })
+
+function calcExamDays() {
+    const currentTime = new Date().getTime()
+    const furtureDate = Date.parse(Finals)
+    const timeDiff = furtureDate - currentTime
+    if (timeDiff <= 0) {
+        clearInterval(interval)
+        console.log(moduleCode,' Exam Day!')
+        return
+    }
+
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+    console.log(`Time remaining: ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`);
+}
 
 
 /*
